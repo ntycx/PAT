@@ -1,0 +1,108 @@
+#include<stdio.h>
+#include<string.h>
+#include<iostream>
+#include<algorithm>
+#include<string>
+#include<cstdio>
+#include<map>
+#include<vector>
+using namespace std;
+const int maxn=210;
+const int INF=1000000000;
+int n,k,num,st;
+int G[maxn][maxn],weight[maxn],d[maxn];
+int maxH=0;
+double maxA=0;
+vector<int> pre[maxn];
+vector<int> path,tempPath;
+bool vis[maxn]={false};
+
+map<int,string> ITS;
+map<string,int> STI;
+
+void DJ(int s){
+	fill(d,d+maxn,INF);
+	d[s]=0;
+	for(int i=0;i<n;i++){
+		int u=-1,MIN=INF;
+		for(int j=0;j<n;j++){
+			if(vis[j]==false&&d[j]<MIN){
+				u=j;
+				MIN=d[j];
+			}
+		}
+		if(u==-1)return;
+		vis[u]=true;
+		for(int v=0;v<n;v++){
+			if(vis[v]==false&&G[u][v]!=INF){
+				if(d[u]+G[u][v]<d[v]){
+					d[v]=d[u]+G[u][v];
+					pre[v].clear();
+					pre[v].push_back(u);
+				}
+				else if(d[u]+G[u][v]==d[v]){
+					pre[v].push_back(u);
+				}
+			}
+		}
+	}
+}
+
+void DFS(int v){
+	if(v==st){
+		tempPath.push_back(v);
+		num++;
+		int tempH=0;
+		for(int i=tempPath.size()-2;i>=0;i--){
+			int id=tempPath[i];
+			tempH+=weight[id];
+		}
+		double tempA=1.0*tempH/(tempPath.size()-1);
+		if(tempH>maxH){
+			maxH=tempH;
+			maxA=tempA;
+			path=tempPath;
+		}
+		else if(tempH==maxH&&tempA>maxA){
+			maxA=tempA;
+			path=tempPath;
+		}
+		tempPath.pop_back();
+		return;
+	}
+	tempPath.push_back(v);
+	for(int i=0;i<pre[v].size();i++){
+		DFS(pre[v][i]);
+	}
+	tempPath.pop_back();
+}
+
+int main(){
+	string start,city1,city2;
+	cin>>n>>k>>start;
+	STI[start]=0;
+	ITS[0]=start;
+	st=STI[start];
+	for(int i=1;i<=n-1;i++){
+		cin>>city1>>weight[i];
+		STI[city1]=i;
+		ITS[i]=city1;
+	}
+	fill(G[0],G[0]+maxn*maxn,INF);
+	int len;
+	for(int i=0;i<k;i++){
+		cin>>city1>>city2>>len;
+		int id1=STI[city1];
+		int id2=STI[city2];
+		G[id1][id2]=G[id2][id1]=len;
+	}
+	DJ(st);
+	int rom=STI["ROM"];
+	DFS(rom);
+	printf("%d %d %d %d\n",num,d[rom],maxH,(int)maxA);
+	for(int i=path.size()-1;i>=0;i--){
+		cout<<ITS[path[i]];
+		if(i>0)cout<<"->";
+	}
+	return 0;
+}
