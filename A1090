@@ -1,0 +1,47 @@
+#include<stdio.h>
+#include<string.h>
+#include<iostream>
+#include<algorithm>
+#include<string>
+#include<cstdio>
+#include<cmath>
+#include<vector>
+using namespace std;
+const int maxn=100010;
+int n,maxDepth,num;
+double p,r,ans;
+vector<int> child[maxn];
+
+void DFS(int index,int depth){
+	if(child[index].size()==0){
+		if(maxDepth<depth){
+			maxDepth=depth;
+			num=1;
+		}
+		else if(maxDepth==depth){
+			num++;
+		}
+		return;
+	}
+	for(int i=0;i<child[index].size();i++){
+		DFS(child[index][i],depth+1);
+	}
+}
+
+int main(){
+	int father,root;
+	scanf("%d%lf%lf",&n,&p,&r);
+	r/=100;
+	for(int i=0;i<n;i++){
+		scanf("%d",&father);
+		if(father!=-1){
+			child[father].push_back(i);
+		}
+		else{
+			root=i;
+		}
+	}
+	DFS(root,0);
+	ans=p*pow(1+r,maxDepth);
+	printf("%.2f %d",ans,num);
+}
